@@ -35,28 +35,14 @@ class MainActivity : AppCompatActivity() {
         val txtCantidad = findViewById<EditText>(R.id.txtCantidad)
         val btnAgregar = findViewById<Button>(R.id.btnAgregar)
 
-        //2- Programar el boton
-        btnAgregar.setOnClickListener {
-            GlobalScope.launch(Dispatchers.IO){
 
-
-                //3- Guardar datos
-                //Primer Paso, creo un objeto de la clase conexion
-                val claseC = ClaseConexionw().cadenaConexion()
-
-                //Segundo Paso creo una variable que contenga un PreparedStatement
-                val addProducto = claseC?.prepareStatement("insert into tbProductos(nombreProducto, precio, cantidad) values(?,?,?)")!!
-                addProducto.setString(1, txtnombre.text.toString())
-                addProducto.setInt(2, txtPrecio.text.toString().toInt())
-                addProducto.setInt(3, txtCantidad.text.toString().toInt())
-                addProducto.executeUpdate()
-
-
-            }
+        fun Limpiar(){
+            txtnombre.setText("")
+            txtCantidad.setText("")
+            txtPrecio.setText("")
         }
 
-
-        ////////////////////////////////Mostrar////////////////////////////////////
+        ////////////////////////////////TODO: Mostrar datos////////////////////////////////////
         val rcvProductos = findViewById<RecyclerView>(R.id.rcvProductos)
 
         //Asignar un layout al RecyclerView
@@ -78,15 +64,48 @@ class MainActivity : AppCompatActivity() {
             return productos
         }
 
-       //Asignar un adaptador
-       CoroutineScope(Dispatchers.IO).launch {
-           val productosDB = obtenerDatos()
-           withContext(Dispatchers.Main){
-               val miApadapter = Adaptador(productosDB)
+        //Asignar un adaptador
+        CoroutineScope(Dispatchers.IO).launch {
+            val productosDB = obtenerDatos()
+            withContext(Dispatchers.Main){
+                val miApadapter = Adaptador(productosDB)
 
-               rcvProductos.adapter = miApadapter
-           }
-       }
+                rcvProductos.adapter = miApadapter
+            }
+        }
+
+        ///////////////////// TODO: Guardar Datos //////////////////////
+
+
+
+        //2- Programar el boton
+        btnAgregar.setOnClickListener {
+            GlobalScope.launch(Dispatchers.IO){
+
+
+                //3- Guardar datos
+                //Primer Paso, creo un objeto de la clase conexion
+                val claseC = ClaseConexionw().cadenaConexion()
+
+                //Segundo Paso creo una variable que contenga un PreparedStatement
+                val addProducto = claseC?.prepareStatement("insert into tbProductos(nombreProducto, precio, cantidad) values(?,?,?)")!!
+                addProducto.setString(1, txtnombre.text.toString())
+                addProducto.setInt(2, txtPrecio.text.toString().toInt())
+                addProducto.setInt(3, txtCantidad.text.toString().toInt())
+                addProducto.executeUpdate()
+
+                val nuevosProductos = obtenerDatos()
+                withContext(Dispatchers.Main){
+                    (rcvProductos.adapter as? Adaptador)?.actualizarLista(nuevosProductos)
+                }
+
+
+            }
+            //Limpiar()
+        }
+
+
+
 
 
     }
